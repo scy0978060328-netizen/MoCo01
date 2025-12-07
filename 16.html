@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fetch Demo</title>
+</head>
+
+<body>
+
+    <h1>Fetch Demo</h1>
+
+    <div class="json-output">
+        <h3>JSON 資料格式</h3>
+        <pre id="jsonOutput"></pre>
+    </div>
+
+    <script>
+        async function f_test() {
+            // The URL of the image you want to fetch
+            let url = 'https://resources.whatwg.org/logo-fetch.svg';
+
+            // Fetch the resource from the URL
+            let response = await fetch(url);
+
+            // Check if the response is ok (status 200)
+            if (!response.ok) {
+                console.error('Failed to fetch image:', response.status);
+                return;
+            }
+
+            // Convert the response to a Blob (binary large object)
+            let blob = await response.blob();
+
+            // Create a new image element
+            let img = document.createElement('img');
+            img.style = 'position:fixed; top:10px; left:10px; width:100px'; // Style the image
+
+            // Append the image to the document body
+            document.body.append(img);
+
+            // Create an Object URL for the Blob and set it as the image source
+            img.src = URL.createObjectURL(blob);
+
+            // Set a timeout to remove the image after 3 seconds
+            setTimeout(() => {
+                img.remove(); // Remove the image from the DOM
+                URL.revokeObjectURL(img.src); // Revoke the Object URL to release memory
+            }, 3000);
+        }
+
+        // Call the function to fetch and display the image
+        f_test();
+    </script>
+
+</body>
+
+</html>
