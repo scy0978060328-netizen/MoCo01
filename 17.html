@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fetch Demo</title>
+  <style>
+    .sensor-data { 
+      margin: 20px; 
+      padding: 15px; 
+      border: 1px solid #ccc; 
+    }
+
+    .axis { 
+      margin: 10px 0; 
+    }
+
+    .value { 
+      font-weight: bold; 
+      color: #007bff; 
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Fetch Demo</h1>
+
+  <div class="json-output">
+    <h3>JSON 資料格式</h3>
+    <form id="formElem">
+      <input type="text" name="firstName" value="John">
+      <br><br>
+      Picture: <input type="file" name="picture" accept="image/*">
+      <br><br>
+      <input type="submit" value="Submit">
+    </form>
+  </div>
+
+  <pre id="jsonOutput"></pre>
+
+  <script>
+    const formElem = document.getElementById("formElem");
+
+    formElem.onsubmit = async (e) => {
+      e.preventDefault(); // Prevent the default form submission
+
+      try {
+        // Send form data using fetch
+        let response = await fetch('https://httpcan.org/post', {
+          method: 'POST',
+          body: new FormData(formElem) // Send the form data including file
+        });
+
+        // Wait for the response and parse it as JSON
+        let result = await response.json();
+
+        // Display the result in an alert
+        alert(result.message);
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Something went wrong!');
+      }
+    };
+  </script>
+
+</body>
+</html>
