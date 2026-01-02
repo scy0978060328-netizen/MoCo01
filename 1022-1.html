@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>即時空氣品質查詢</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    table { border-collapse: collapse; margin-top: 20px; width: 100%; }
+    th, td { border: 1px solid #aaa; padding: 8px; text-align: center; }
+    th { background: #f0f0f0; }
+  </style>
+</head>
+<body>
+
+<h2>目前位置空氣品質查詢</h2>
+
+暱稱：
+<input type="text" id="name" placeholder="輸入暱稱">
+
+<button onclick="getMyAQI()">查詢我目前的空氣品質</button>
+
+<table>
+  <thead>
+    <tr>
+      <th>暱稱</th>
+      <th>所在位置</th>
+      <th>最近測站</th>
+      <th>AQI</th>
+      <th>空氣品質</th>
+    </tr>
+  </thead>
+  <tbody id="result"></tbody>
+</table>
+
+<script>
+const API_KEY = "c5f73ea7-714a-46fa-bb43-f7421cbcbdb2";
+let aqiData = [];
+
+// 先載入所有測站資料
+fetch(`https://data.moenv.gov.tw/api/v2/aqx_p_432?api_key=${API_KEY}&format=JSON`)
+  .then(res => res.json())
+  .then(data => aqiData = data.records);
+
+// 計算兩點距離（公里）
+function distance(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a =
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) *
+    Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function getMyAQI() {
+  const name = document.getElementById("name").value || "匿名";
+
+  if (!navigator.geolocation) {
+    alert("瀏覽器不支援定位功能");
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(pos => {
+    const myLat = pos.coords.latitude;
+    const myLon = pos.coords.longitude;
+
+    let nearest = null;
+    let minDist = Infinity;
+
+    aqiData.forEach(item => {
+      if (!item.latitude || !item.longitude) return;
+
+      const d = distance(
+        myLat, myLon,
+        parseFloat(item.latitude),
+        parseFloat(item.longitude)
+      );
+
+      if (d < minDist) {
+        minDist = d;
+        nearest = item;
+      }
+    });
+
+    if (!nearest) return;
+
+    document.getElementById("result").innerHTML = `
+      <tr>
+        <td>${name}</td>
+        <td>(${myLat.toFixed(4)}, ${myLon.toFixed(4)})</td>
+        <td>${nearest.county} ${nearest.sitename}</td>
+        <td>${nearest.aqi}</td>
+        <td>${nearest.status}</td>
+      </tr>
+    `;
+  }, () => {
+    alert("請允許定位，否則無法取得目前位置");
+  });
+}
+</script>
+
+</body>
+</html>
