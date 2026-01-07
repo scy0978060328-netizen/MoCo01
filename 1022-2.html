@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>空氣品質查詢紀錄</title>
+<style>
+  body { font-family: Arial; padding: 20px; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { border: 1px solid #aaa; padding: 8px; text-align: center; }
+  th { background: #f0f0f0; }
+</style>
+</head>
+<body>
+
+<h2>歷史查詢紀錄</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>暱稱</th>
+      <th>位置</th>
+      <th>AQI</th>
+      <th>空氣品質</th>
+      <th>填寫時間</th>
+    </tr>
+  </thead>
+  <tbody id="list"></tbody>
+</table>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBM36LbTtWYGEnuT_-MUqOy4lQct2nC8Cc",
+  authDomain: "air1022.firebaseapp.com",
+  projectId: "air1022",
+  storageBucket: "air1022.firebasestorage.app",
+  messagingSenderId: "1028093617614",
+  appId: "1:1028093617614:web:c3d5c3740317eb5103379f",
+  measurementId: "G-PJVDR9BG9S"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const q = query(collection(db, "records"), orderBy("time", "desc"));
+const snapshot = await getDocs(q);
+
+const tbody = document.getElementById("list");
+
+snapshot.forEach(doc => {
+  const d = doc.data();
+  tbody.innerHTML += `
+    <tr>
+      <td>${d.name}</td>
+      <td>${d.location}</td>
+      <td>${d.aqi}</td>
+      <td>${d.status}</td>
+      <td>${d.time}</td>
+    </tr>
+  `;
+});
+</script>
+
+</body>
+</html>
