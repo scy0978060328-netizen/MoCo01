@@ -3,12 +3,67 @@
 <head>
 <meta charset="UTF-8">
 <title>空氣品質查詢紀錄</title>
+
 <style>
-  body { font-family: Arial; padding: 20px; }
-  table { border-collapse: collapse; width: 100%; }
-  th, td { border: 1px solid #aaa; padding: 8px; text-align: center; }
-  th { background: #f0f0f0; }
+  /* ===== 全域背景 ===== */
+  body {
+    font-family: "Segoe UI", "Noto Sans TC", sans-serif;
+    padding: 60px;
+    background: linear-gradient(145deg, #eef2f7, #f9fbff);
+    font-size: 20px;
+    color: #2c3e50;
+  }
+
+  h2 {
+    font-size: 36px;
+    margin-bottom: 35px;
+    letter-spacing: 1px;
+  }
+
+  /* ===== 表格容器 ===== */
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    background: white;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.08);
+    font-size: 20px;
+  }
+
+  /* ===== 表頭 ===== */
+  thead {
+    background: linear-gradient(135deg, #4facfe, #00c6ff);
+    color: white;
+  }
+
+  th {
+    padding: 18px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-align: center;
+  }
+
+  /* ===== 表身 ===== */
+  td {
+    padding: 18px;
+    text-align: center;
+  }
+
+  tbody tr {
+    transition: background 0.2s, transform 0.15s;
+  }
+
+  tbody tr:hover {
+    background: #f2f7ff;
+    transform: scale(1.005);
+  }
+
+  tbody tr:not(:last-child) td {
+    border-bottom: 1px solid #e5e9f2;
+  }
 </style>
+
 </head>
 <body>
 
@@ -27,9 +82,14 @@
   <tbody id="list"></tbody>
 </table>
 
+<!-- 🔴 JS 完全不動 -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import {
+  getFirestore,
+  collection,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBM36LbTtWYGEnuT_-MUqOy4lQct2nC8Cc",
@@ -37,29 +97,34 @@ const firebaseConfig = {
   projectId: "air1022",
   storageBucket: "air1022.firebasestorage.app",
   messagingSenderId: "1028093617614",
-  appId: "1:1028093617614:web:c3d5c3740317eb5103379f",
-  measurementId: "G-PJVDR9BG9S"
+  appId: "1:1028093617614:web:c3d5c3740317eb5103379f"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const q = query(collection(db, "records"), orderBy("time", "desc"));
-const snapshot = await getDocs(q);
+document.addEventListener("DOMContentLoaded", async () => {
+  const tbody = document.getElementById("list");
 
-const tbody = document.getElementById("list");
+  try {
+    const snapshot = await getDocs(collection(db, "records"));
 
-snapshot.forEach(doc => {
-  const d = doc.data();
-  tbody.innerHTML += `
-    <tr>
-      <td>${d.name}</td>
-      <td>${d.location}</td>
-      <td>${d.aqi}</td>
-      <td>${d.status}</td>
-      <td>${d.time}</td>
-    </tr>
-  `;
+    snapshot.forEach(doc => {
+      const d = doc.data();
+      tbody.innerHTML += `
+        <tr>
+          <td>${d.name ?? ""}</td>
+          <td>${d.location ?? ""}</td>
+          <td>${d.aqi ?? ""}</td>
+          <td>${d.status ?? ""}</td>
+          <td>${d.time ?? ""}</td>
+        </tr>
+      `;
+    });
+  } catch (err) {
+    console.error(err);
+    alert("Firestore 讀取失敗，請看 console");
+  }
 });
 </script>
 
